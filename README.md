@@ -1,7 +1,13 @@
 # GONSU One — SDK Lisensi (Go)
 
-SDK yang ditanam **di dalam** produk yang dijual GONSU. Ia menjawab satu
-pertanyaan: apa yang boleh dijalankan instalasi ini, dan sampai kapan.
+**Untuk tim yang membangun produk untuk dijual di GONSU One.**
+
+SDK ini ditanam **di dalam** produk Anda. Ia menjawab satu pertanyaan: apa yang
+boleh dijalankan pemasangan ini, dan sampai kapan.
+
+Yang TIDAK perlu Anda kerjakan sendiri: menerbitkan pemasangan, menyerahkan
+token aktivasi, atau menerapkan lisensi ketika ada yang berlangganan. Platform
+yang mengurusnya — produk Anda cukup membaca `Status()`.
 
 ```
 go get github.com/gonsutrijayautama/gonsu-one-sdk-go
@@ -87,6 +93,52 @@ if batas, tanpaBatas := status.Limit("users.max"); !tanpaBatas && jumlah >= bata
 `Open` **tidak menyentuh jaringan**. Produk yang dimulai saat GONSU tidak dapat
 dihubungi tetap dapat berjalan dari lease di disk — itulah seluruh gunanya lease
 disimpan.
+
+## Dari mana kunci publik GONSU didapat
+
+`VendorKeys` ditanam saat build, diambil dari OpenBao — sumber yang sama dengan
+pipeline GONSU sendiri:
+
+```sh
+curl -sS -H "X-Vault-Token: $GONSU_ONE_OPENBAO_TOKEN" \
+  "$GONSU_ONE_OPENBAO_ADDRESS/v1/transit/keys/license-signing-v1" | python3 -c '
+import json, sys
+data = json.load(sys.stdin)["data"]
+minimum = int(data.get("min_decryption_version") or 1)
+versi = sorted((int(v) for v in data["keys"] if int(v) >= minimum), reverse=True)
+print(",".join(data["keys"][str(v)]["public_key"] for v in versi))'
+```
+
+**Ambil SELURUH versi, dipisah koma — bukan yang terbaru saja.** Alasannya di
+bagian berikut; mengabaikannya berarti produk Anda berhenti memverifikasi pada
+hari GONSU berpindah kunci.
+
+Perintah yang sama sudah ada di `scripts/selfhost-package.sh` pada repository
+platform, dan pipeline build produk Anda dapat menyalinnya.
+
+## TLS wajib, kecuali ke diri sendiri
+
+`Open` **menolak** `http://` ke host mana pun selain loopback:
+
+```
+https://api.gonsu.cloud     ✓
+http://localhost:8091       ✓   pengembangan
+http://127.0.0.1:8091       ✓
+http://api.gonsu.cloud      ✗   ErrInsecureBaseURL
+```
+
+SDK tidak punya — dan tidak boleh punya — gagasan tentang "production"; ia
+hanya tahu alamat yang Anda berikan. Yang dapat diputuskannya sendiri adalah
+aturan yang tidak butuh konfigurasi: **teks polos hanya boleh menuju diri
+sendiri.**
+
+Tidak ada flag `AllowInsecure`, dan itu disengaja. Flag yang harus diingat
+seseorang adalah flag yang menyala di production justru karena ia menyala di
+laptop lebih dulu, lalu ikut tersalin.
+
+Yang dijaga bukan kerahasiaan lease — ia bertanda tangan dan sudah tahan
+diubah. Yang dijaga adalah **token aktivasi** yang melintas di badan request.
+Jaringan di dalam cluster pun bukan alasan mengirimkannya sebagai teks polos.
 
 ## Rotasi kunci — baca ini sebelum rilis pertama
 
@@ -242,8 +294,8 @@ Produk Anda yang memutuskan orang itu menjadi apa di dalamnya.
 dapat diperiksa dan diambil dengan perkakas Go yang lazim — bukan agar dapat
 dipakai bebas.
 
-Pelanggan dengan perjanjian berlangganan GONSU One yang masih berlaku boleh
-memakai, mengubah, dan menautkannya ke dalam produknya, semata-mata untuk
-berinteraksi dengan layanan GONSU One. Selengkapnya di [LICENSE](LICENSE).
+Perkakas internal untuk tim yang membangun produk bagi platform GONSU One.
+Pembeli produk tersebut menerima bentuk terkompilasinya dan tidak membutuhkan
+lisensi tersendiri. Selengkapnya di [LICENSE](LICENSE).
 
 Hak Cipta (c) 2026 PT Gonsu Trijaya Utama.
