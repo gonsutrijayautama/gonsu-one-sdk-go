@@ -51,6 +51,51 @@
       "signature_base64": "ioJx5ZmhPb/W5WAmFLHCvdPMDJtm6+q/zvcU1tgn60HKzWi8+QAVpdqNySqe3tSuAhyatXKcVC3h2b/2wwV1DQ=="
     }
   ],
+  "request_body": [
+    {
+      "name": "aktivasi",
+      "path": "/license/v1/activate",
+      "signed": false,
+      "body": "{\"installation_id\":\"ins_01M1KONTRAK0000000000000001\",\"activation_token\":\"act_kontrak\",\"public_key\":\"I7xUkSwebpLEqGglyGfif/3FVb/71CRPF6Jqv//ull0=\",\"version\":\"1.2.3\",\"platform\":\"linux\"}",
+      "input": {
+        "installation_id": "ins_01M1KONTRAK0000000000000001",
+        "platform": "linux",
+        "token": "act_kontrak",
+        "version": "1.2.3"
+      }
+    },
+    {
+      "name": "heartbeat",
+      "path": "/license/v1/heartbeat",
+      "signed": true,
+      "body": "{\"version\":\"1.2.3\",\"platform\":\"linux\"}",
+      "input": {
+        "platform": "linux",
+        "version": "1.2.3"
+      }
+    },
+    {
+      "name": "pemeriksaan pembaruan",
+      "path": "/license/v1/update",
+      "signed": true,
+      "body": "{\"version\":\"1.2.3\"}",
+      "input": {
+        "version": "1.2.3"
+      }
+    },
+    {
+      "name": "pencopotan",
+      "path": "/license/v1/deactivate",
+      "signed": true,
+      "body": "{}"
+    },
+    {
+      "name": "kredensial registry",
+      "path": "/license/v1/registry-credential",
+      "signed": true,
+      "body": "{}"
+    }
+  ],
   "lease": [
     {
       "name": "lease segar",
@@ -192,7 +237,7 @@
       "skew_seconds": 0,
       "expect": {
         "verified": false,
-        "error": "mesin_lain",
+        "error": "other_machine",
         "allowed": false,
         "offline": false,
         "schema_ahead": false
@@ -209,7 +254,7 @@
       "skew_seconds": 0,
       "expect": {
         "verified": false,
-        "error": "offline_tanpa_pengikatan",
+        "error": "unbound",
         "allowed": false,
         "offline": false,
         "schema_ahead": false
@@ -225,7 +270,7 @@
       "skew_seconds": 0,
       "expect": {
         "verified": false,
-        "error": "tanda_tangan",
+        "error": "signature",
         "allowed": false,
         "offline": false,
         "schema_ahead": false

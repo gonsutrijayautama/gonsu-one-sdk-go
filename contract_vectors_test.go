@@ -5,6 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
@@ -42,6 +45,13 @@ type contractFile struct {
 		PayloadBase64   string `json:"payload_base64"`
 		SignatureBase64 string `json:"signature_base64"`
 	} `json:"signing_payload"`
+	RequestBody []struct {
+		Name   string            `json:"name"`
+		Path   string            `json:"path"`
+		Signed bool              `json:"signed"`
+		Body   string            `json:"body"`
+		Input  map[string]string `json:"input"`
+	} `json:"request_body"`
 	Lease []struct {
 		Name        string `json:"name"`
 		Why         string `json:"why"`
@@ -73,7 +83,7 @@ func loadContract(t *testing.T) contractFile {
 	if err := json.Unmarshal(raw, &file); err != nil {
 		t.Fatalf("mengurai kontrak: %v", err)
 	}
-	if len(file.SigningPayload) == 0 || len(file.Lease) == 0 {
+	if len(file.SigningPayload) == 0 || len(file.Lease) == 0 || len(file.RequestBody) == 0 {
 		t.Fatal("kontrak kosong")
 	}
 	return file
@@ -155,9 +165,9 @@ func TestContract_Lease(t *testing.T) {
 				// Jenis penolakan ikut diperiksa: menolak karena alasan yang
 				// salah berarti perlindungan yang dikira ada sebenarnya tidak.
 				harapan := map[string]error{
-					"tanda_tangan":             gonsu.ErrBadLeaseSignature,
-					"mesin_lain":               gonsu.ErrLeaseBukanUntukMesinIni,
-					"offline_tanpa_pengikatan": gonsu.ErrLeaseOfflineTanpaPengikatan,
+					"signature":     gonsu.ErrBadLeaseSignature,
+					"other_machine": gonsu.ErrLeaseBukanUntukMesinIni,
+					"unbound":       gonsu.ErrLeaseOfflineTanpaPengikatan,
 				}[kasus.Expect.Error]
 				if harapan == nil {
 					t.Fatalf("jenis galat %q belum dikenali test ini", kasus.Expect.Error)
@@ -190,6 +200,89 @@ func TestContract_Lease(t *testing.T) {
 			if status.SchemaAhead != kasus.Expect.SchemaAhead {
 				t.Errorf("schema_ahead = %t, kontrak menuntut %t\n  %s",
 					status.SchemaAhead, kasus.Expect.SchemaAhead, kasus.Why)
+			}
+		})
+	}
+}
+
+// TestContract_RequestBody membuktikan SDK MENGIRIM nama field yang sama.
+//
+// Yang dijaga di sini tidak dijaga TestContract_SigningPayload sama sekali:
+// tanda tangan menutupi byte badan request, bukan artinya. SDK yang menuliskan
+// `token` ketika server menunggu `activation_token` menghasilkan tanda tangan
+// yang SAH atas badan yang SALAH — server menerima buktinya, lalu menolak
+// isinya, dan pesan galatnya tidak menyebut field mana yang keliru.
+func TestContract_RequestBody(t *testing.T) {
+	t.Parallel()
+
+	file := loadContract(t)
+	private, err := base64.StdEncoding.DecodeString(file.VendorKey.Private)
+	if err != nil {
+		t.Fatalf("kunci uji: %v", err)
+	}
+
+	// Server palsu yang merekam apa yang dikirim. Alamatnya loopback, sehingga
+	// penjagaan TLS SDK ini tidak perlu dilonggarkan untuk mengujinya.
+	var (
+		terekamPath string
+		terekamBody []byte
+		terekamTTD  string
+	)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		terekamPath = r.URL.Path
+		terekamBody, _ = io.ReadAll(r.Body)
+		terekamTTD = r.Header.Get("X-GONSU-Signature")
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	defer server.Close()
+
+	client := gonsu.NewClient(server.URL, "ins_01M1KONTRAK0000000000000001",
+		ed25519.PrivateKey(private), server.Client())
+
+	kirim := map[string]func() error{
+		"/license/v1/activate": func() error {
+			_, err := client.Activate(t.Context(), "act_kontrak", "1.2.3", "linux")
+			return err
+		},
+		"/license/v1/heartbeat": func() error {
+			_, err := client.Heartbeat(t.Context(), "1.2.3", "linux")
+			return err
+		},
+		"/license/v1/update": func() error {
+			_, err := client.CheckUpdate(t.Context(), "1.2.3")
+			return err
+		},
+		"/license/v1/deactivate": func() error {
+			return client.Deactivate(t.Context())
+		},
+		"/license/v1/registry-credential": func() error {
+			_, err := client.RegistryCredential(t.Context())
+			return err
+		},
+	}
+
+	for _, kasus := range file.RequestBody {
+		t.Run(kasus.Name, func(t *testing.T) {
+			jalankan, ada := kirim[kasus.Path]
+			if !ada {
+				t.Fatalf("kontrak menyebut %s tetapi SDK tidak punya method untuknya", kasus.Path)
+			}
+			if err := jalankan(); err != nil {
+				t.Fatalf("memanggil %s: %v", kasus.Path, err)
+			}
+
+			if terekamPath != kasus.Path {
+				t.Errorf("path terkirim %q, kontrak menuntut %q", terekamPath, kasus.Path)
+			}
+			// Dibandingkan sebagai BYTE, bukan sebagai JSON yang setara.
+			// Urutan field dan spasi ikut ditandatangani, sehingga dua badan
+			// yang "sama artinya" tetap menghasilkan tanda tangan berbeda.
+			if string(terekamBody) != kasus.Body {
+				t.Errorf("badan terkirim:\n  %s\nkontrak menuntut:\n  %s", terekamBody, kasus.Body)
+			}
+			if (terekamTTD != "") != kasus.Signed {
+				t.Errorf("bertanda tangan=%v, kontrak menuntut %v", terekamTTD != "", kasus.Signed)
 			}
 		})
 	}
