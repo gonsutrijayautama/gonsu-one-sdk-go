@@ -219,7 +219,14 @@ func (c *Client) request(ctx context.Context, path string, body []byte, sign boo
 		return nil, fmt.Errorf("membaca jawaban GONSU: %w", err)
 	}
 
-	if response.StatusCode != http.StatusOK {
+	// Seluruh 2xx diterima, bukan hanya 200.
+	//
+	// `deactivate` menjawab 204 tanpa badan — dan memperlakukannya sebagai
+	// kegagalan berarti pencopotan SELALU dilaporkan gagal meskipun GONSU
+	// sudah melepaskannya. Memeriksa satu kode persis membuat setiap endpoint
+	// baru yang menjawab 201 atau 202 ikut patah, dan patahnya baru terlihat
+	// dari sisi pelanggan.
+	if response.StatusCode < 200 || response.StatusCode > 299 {
 		return nil, apiErrorFrom(response.StatusCode, payload)
 	}
 	return payload, nil

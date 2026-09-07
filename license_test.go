@@ -47,6 +47,15 @@ func platformBaru(t *testing.T, issued time.Time) *platformPalsu {
 		platform.jawab(w, r)
 	})
 
+	mux.HandleFunc("/license/v1/deactivate", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("X-GONSU-Signature") == "" {
+			http.Error(w, `{"error":{"code":"unauthenticated"}}`, http.StatusUnauthorized)
+			return
+		}
+		// 204 tanpa badan, persis seperti GONSU sungguhan.
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	platform.server = httptest.NewServer(mux)
 	t.Cleanup(platform.server.Close)
 	return platform
