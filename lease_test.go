@@ -12,8 +12,8 @@ import (
 	gonsu "github.com/gonsutrijayautama/gonsu-one-sdk-go"
 )
 
-// terbitkan menyusun lease bertanda tangan seperti yang dilakukan GONSU.
-func terbitkan(t *testing.T, key ed25519.PrivateKey, lease gonsu.Lease) gonsu.SignedLease {
+// issueLease menyusun lease bertanda tangan seperti yang dilakukan GONSU.
+func issueLease(t *testing.T, key ed25519.PrivateKey, lease gonsu.Lease) gonsu.SignedLease {
 	t.Helper()
 
 	payload, err := json.Marshal(lease)
@@ -27,7 +27,7 @@ func terbitkan(t *testing.T, key ed25519.PrivateKey, lease gonsu.Lease) gonsu.Si
 	}
 }
 
-func leaseContoh(issued time.Time) gonsu.Lease {
+func sampleLease(issued time.Time) gonsu.Lease {
 	return gonsu.Lease{
 		InstallationID: "ins_01M1",
 		ProductCode:    "garment",
@@ -52,7 +52,7 @@ func TestVerifyLeaseMenerimaYangSah(t *testing.T) {
 	public, private, _ := ed25519.GenerateKey(nil)
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
 
-	lease, err := gonsu.VerifyLease([]gonsu.VendorKey{gonsu.VendorKey(public)}, terbitkan(t, private, leaseContoh(issued)))
+	lease, err := gonsu.VerifyLease([]gonsu.VendorKey{gonsu.VendorKey(public)}, issueLease(t, private, sampleLease(issued)))
 	if err != nil {
 		t.Fatalf("lease sah ditolak: %v", err)
 	}
@@ -69,16 +69,16 @@ func TestVerifyLeaseMenolakYangDiubah(t *testing.T) {
 	public, private, _ := ed25519.GenerateKey(nil)
 	_, penyerang, _ := ed25519.GenerateKey(nil)
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	asli := terbitkan(t, private, leaseContoh(issued))
+	asli := issueLease(t, private, sampleLease(issued))
 
 	// Lease dengan isi yang menguntungkan penyerang, ditandatangani kunci lain.
-	dipalsukan := leaseContoh(issued)
+	dipalsukan := sampleLease(issued)
 	dipalsukan.PlanCode = "enterprise"
 	dipalsukan.GraceUntil = issued.AddDate(10, 0, 0)
-	palsu := terbitkan(t, penyerang, dipalsukan)
+	palsu := issueLease(t, penyerang, dipalsukan)
 
 	// Isi diubah, tanda tangan asli dipertahankan.
-	diubah := leaseContoh(issued)
+	diubah := sampleLease(issued)
 	diubah.Entries[1].Integer = 100000
 	payloadDiubah, err := json.Marshal(diubah)
 	if err != nil {
@@ -111,7 +111,7 @@ func TestVerifyLeaseMenolakYangDiubah(t *testing.T) {
 		},
 		{
 			name:   "satu byte tanda tangan dibalik",
-			signed: gonsu.SignedLease{Lease: asli.Lease, Signature: balikSatuByte(t, asli.Signature)},
+			signed: gonsu.SignedLease{Lease: asli.Lease, Signature: flipOneByte(t, asli.Signature)},
 		},
 		{
 			name:   "isi bukan base64",
@@ -131,7 +131,7 @@ func TestVerifyLeaseMenolakYangDiubah(t *testing.T) {
 }
 
 // balikSatuByte mengubah satu byte di dalam tanda tangan.
-func balikSatuByte(t *testing.T, signature string) string {
+func flipOneByte(t *testing.T, signature string) string {
 	t.Helper()
 
 	raw, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(signature, "vault:v1:"))
@@ -146,7 +146,7 @@ func TestStatusMengikutiUmurLease(t *testing.T) {
 	t.Parallel()
 
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	lease := leaseContoh(issued)
+	lease := sampleLease(issued)
 
 	cases := []struct {
 		name    string
@@ -183,7 +183,7 @@ func TestStatusMenolakLeaseSegarYangTidakDiberiHak(t *testing.T) {
 	t.Parallel()
 
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	lease := leaseContoh(issued)
+	lease := sampleLease(issued)
 	lease.Granted = false
 	lease.Status = "suspended"
 
@@ -200,7 +200,7 @@ func TestStatusMembacaEntitlement(t *testing.T) {
 	t.Parallel()
 
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	status := gonsu.StatusAt(leaseContoh(issued), issued.Add(time.Minute), 0)
+	status := gonsu.StatusAt(sampleLease(issued), issued.Add(time.Minute), 0)
 
 	if !status.Feature("modul_penggajian") {
 		t.Fatal("modul_penggajian seharusnya menyala")

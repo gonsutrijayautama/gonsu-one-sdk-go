@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "description": "Kontrak lisensi GONSU One yang dapat dijalankan. Dihasilkan server; setiap SDK menjadikannya test. Kunci di dalamnya kunci UJI, bukan kunci sungguhan.",
+  "vendor_key": {
+    "public_base64": "I7xUkSwebpLEqGglyGfif/3FVb/71CRPF6Jqv//ull0=",
+    "private_base64": "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYjvFSRLB5uksSoaCXIZ+J//cVVv/vUJE8Xomq//+6WXQ=="
+  },
+  "signing_payload": [
+    {
+      "name": "heartbeat tanpa badan",
+      "installation_id": "ins_01M1KONTRAK0000000000000001",
+      "method": "POST",
+      "path": "/license/v1/heartbeat",
+      "timestamp_unix": 1788688800,
+      "nonce": "0123456789abcdef0123456789abcdef",
+      "body_base64": "",
+      "payload_base64": "UE9TVAovbGljZW5zZS92MS9oZWFydGJlYXQKaW5zXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAwMQoxNzg4Njg4ODAwCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmCmUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTU=",
+      "signature_base64": "FGevoRYe0KIowi6RCFd4TqZRhhwAJVaD1kIgIQ2EoayxlmBFNFgdT41MNH5+Dbvkoui7rGzRdmIaYqE6wUZ3Bg=="
+    },
+    {
+      "name": "heartbeat dengan badan",
+      "installation_id": "ins_01M1KONTRAK0000000000000001",
+      "method": "POST",
+      "path": "/license/v1/heartbeat",
+      "timestamp_unix": 1788688800,
+      "nonce": "0123456789abcdef0123456789abcdef",
+      "body_base64": "eyJ2ZXJzaW9uIjoiMS4yLjMifQ==",
+      "payload_base64": "UE9TVAovbGljZW5zZS92MS9oZWFydGJlYXQKaW5zXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAwMQoxNzg4Njg4ODAwCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmCjY3NTJjZWE3ODhhYmE0MjMwYjA1NGE2YmVmMzliZTZkNmJjOGY4MDZmMjg3NjNlZmY4Y2VkOGIyOGI5MTdmYTI=",
+      "signature_base64": "uv/4MMaQe50X0e+EwcoLyOG3FTt7JCrrHv+jwGjPjvqfpof2VijpYaQVuyqf7qzDNSk+O7hywm4I2OGfGjd4Cg=="
+    },
+    {
+      "name": "method huruf kecil",
+      "installation_id": "ins_01M1KONTRAK0000000000000001",
+      "method": "post",
+      "path": "/license/v1/update",
+      "timestamp_unix": 1788688800,
+      "nonce": "0123456789abcdef0123456789abcdef",
+      "body_base64": "",
+      "payload_base64": "UE9TVAovbGljZW5zZS92MS91cGRhdGUKaW5zXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAwMQoxNzg4Njg4ODAwCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmCmUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTU=",
+      "signature_base64": "lx3j4+JhO3AsWMIvZke5/5aILhbfd1cxT8SuEweboXJIqUlcIfY7j4roeHfR0cJTAnfFrCO4q6SibE2RTLTCAg=="
+    },
+    {
+      "name": "path berbeda",
+      "installation_id": "ins_01M1KONTRAK0000000000000001",
+      "method": "POST",
+      "path": "/license/v1/deactivate",
+      "timestamp_unix": 1788688800,
+      "nonce": "0123456789abcdef0123456789abcdef",
+      "body_base64": "",
+      "payload_base64": "UE9TVAovbGljZW5zZS92MS9kZWFjdGl2YXRlCmluc18wMU0xS09OVFJBSzAwMDAwMDAwMDAwMDAwMDEKMTc4ODY4ODgwMAowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZgplM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1",
+      "signature_base64": "ioJx5ZmhPb/W5WAmFLHCvdPMDJtm6+q/zvcU1tgn60HKzWi8+QAVpdqNySqe3tSuAhyatXKcVC3h2b/2wwV1DQ=="
+    }
+  ],
+  "lease": [
+    {
+      "name": "lease segar",
+      "why": "keadaan biasa: masih berlaku dan diberi hak",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wOS0wN1QxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjYtMDktMTBUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjkwMH0=",
+      "signature": "vault:v1:w0w7PXlIZtFRNZ+ycrCxtvkwZED4kwsCjnr1M4GSkrkjN6G3aaVTXhZ/0pZ9rQu72OJIJYAjc4f0A99B2lm9AA==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-06T11:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": true,
+        "state": "active",
+        "allowed": true,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "dalam masa tenggang",
+      "why": "kedaluwarsa TETAPI masih dilayani; mematikan pelanggan pada detik lease habis adalah reaksi yang tidak dapat dibatalkan",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wOS0wN1QxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjYtMDktMTBUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjkwMH0=",
+      "signature": "vault:v1:w0w7PXlIZtFRNZ+ycrCxtvkwZED4kwsCjnr1M4GSkrkjN6G3aaVTXhZ/0pZ9rQu72OJIJYAjc4f0A99B2lm9AA==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-07T16:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": true,
+        "state": "grace",
+        "allowed": true,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "tenggang habis",
+      "why": "sesudah ini produk berhenti sendiri",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wOS0wN1QxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjYtMDktMTBUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjkwMH0=",
+      "signature": "vault:v1:w0w7PXlIZtFRNZ+ycrCxtvkwZED4kwsCjnr1M4GSkrkjN6G3aaVTXhZ/0pZ9rQu72OJIJYAjc4f0A99B2lm9AA==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-10T14:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": true,
+        "state": "expired",
+        "allowed": false,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "langganan ditangguhkan",
+      "why": "dua sumbu: lease masih SEGAR tetapi hak pakai tidak diberikan",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6ZmFsc2UsInBsYW5fY29kZSI6InBybyIsInBsYW5fbmFtZSI6IlBybyIsInN0YXR1cyI6InN1c3BlbmRlZCIsImVudHJpZXMiOlt7ImtleSI6InVzZXJzLm1heCIsInZhbHVlX3R5cGUiOiJpbnRlZ2VyIiwiYm9vbGVhbiI6ZmFsc2UsImludGVnZXIiOjI1LCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX0seyJrZXkiOiJiYWNrdXAuZW5hYmxlZCIsInZhbHVlX3R5cGUiOiJib29sZWFuIiwiYm9vbGVhbiI6dHJ1ZSwiaW50ZWdlciI6MCwidGV4dCI6IiIsInVubGltaXRlZCI6ZmFsc2V9XSwic2NoZW1hX3ZlcnNpb24iOjEsImlzc3VlZF9hdCI6IjIwMjYtMDktMDZUMTA6MDA6MDBaIiwiZXhwaXJlc19hdCI6IjIwMjYtMDktMDdUMTA6MDA6MDBaIiwiZ3JhY2VfdW50aWwiOiIyMDI2LTA5LTEwVDEwOjAwOjAwWiIsImhlYXJ0YmVhdF9zZWNvbmRzIjo5MDB9",
+      "signature": "vault:v1:A3xGEth5q3cswMs75YpiprXFK7mF5NRpHcWuXcDG2V5C8hOl77vtU4yExhOOI9a5anl8Xn8w5SfWKU+GsxwoDw==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-06T11:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": true,
+        "state": "active",
+        "allowed": false,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "jam maju dua menit",
+      "why": "toleransi HANYA memperpanjang; jam server yang maju tidak boleh mematikan lisensi yang sah",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wOS0wN1QxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjYtMDktMTBUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjkwMH0=",
+      "signature": "vault:v1:w0w7PXlIZtFRNZ+ycrCxtvkwZED4kwsCjnr1M4GSkrkjN6G3aaVTXhZ/0pZ9rQu72OJIJYAjc4f0A99B2lm9AA==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-07T10:02:00Z",
+      "skew_seconds": 300,
+      "expect": {
+        "verified": true,
+        "state": "active",
+        "allowed": true,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "jam maju dua menit, tanpa toleransi",
+      "why": "kasus yang sama tanpa kelonggaran: sudah masuk masa tenggang",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wOS0wN1QxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjYtMDktMTBUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjkwMH0=",
+      "signature": "vault:v1:w0w7PXlIZtFRNZ+ycrCxtvkwZED4kwsCjnr1M4GSkrkjN6G3aaVTXhZ/0pZ9rQu72OJIJYAjc4f0A99B2lm9AA==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-07T10:02:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": true,
+        "state": "grace",
+        "allowed": true,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "skema lebih baru",
+      "why": "TIDAK boleh menghentikan produk; hanya ditandai supaya SDK diketahui perlu diperbarui",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MiwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wOS0wN1QxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjYtMDktMTBUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjkwMH0=",
+      "signature": "vault:v1:5Ap/sbYHeg4/SmjMGK6aus2vUWO4Hz+NsHtwVmrWX7fLqQ8tIkXc5ScSSsyNJC/c6FHFCCBMmW0kwptEC4Y7Bw==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-06T11:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": true,
+        "state": "active",
+        "allowed": true,
+        "offline": false,
+        "schema_ahead": true
+      }
+    },
+    {
+      "name": "lisensi offline, mesin yang benar",
+      "why": "diverifikasi sepenuhnya tanpa menghubungi GONSU",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaW5zdGFsbGF0aW9uX3B1YmxpY19rZXkiOiJBTkJhSFI2aVVUbHRWWHI3MUZpTFBHMloyK3VYTCswUW95Vmk2aWJjM1BvPSIsIm9mZmxpbmUiOnRydWUsImlzc3VlZF9hdCI6IjIwMjYtMDktMDZUMTA6MDA6MDBaIiwiZXhwaXJlc19hdCI6IjIwMjctMDMtMDVUMTA6MDA6MDBaIiwiZ3JhY2VfdW50aWwiOiIyMDI3LTAzLTA1VDEwOjAwOjAwWiIsImhlYXJ0YmVhdF9zZWNvbmRzIjowfQ==",
+      "signature": "vault:v1:vcHhGTHOdrGRBeseXiWHT1azekrPl6GHR6F5TXkjdgJch/so77NU06jNdpzKqdHQJtswvxs42e5qyDYn+jpdBg==",
+      "key_name": "license-signing-v1",
+      "machine_key_base64": "ANBaHR6iUTltVXr71FiLPG2Z2+uXL+0QoyVi6ibc3Po=",
+      "now": "2026-09-07T10:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": true,
+        "state": "active",
+        "allowed": true,
+        "offline": true,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "lisensi offline disalin ke mesin lain",
+      "why": "lisensi offline tidak dapat dicabut, jadi pengikatan pada mesin adalah satu-satunya yang membatasinya",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaW5zdGFsbGF0aW9uX3B1YmxpY19rZXkiOiJBTkJhSFI2aVVUbHRWWHI3MUZpTFBHMloyK3VYTCswUW95Vmk2aWJjM1BvPSIsIm9mZmxpbmUiOnRydWUsImlzc3VlZF9hdCI6IjIwMjYtMDktMDZUMTA6MDA6MDBaIiwiZXhwaXJlc19hdCI6IjIwMjctMDMtMDVUMTA6MDA6MDBaIiwiZ3JhY2VfdW50aWwiOiIyMDI3LTAzLTA1VDEwOjAwOjAwWiIsImhlYXJ0YmVhdF9zZWNvbmRzIjowfQ==",
+      "signature": "vault:v1:vcHhGTHOdrGRBeseXiWHT1azekrPl6GHR6F5TXkjdgJch/so77NU06jNdpzKqdHQJtswvxs42e5qyDYn+jpdBg==",
+      "key_name": "license-signing-v1",
+      "machine_key_base64": "YJXpSzsdkJTe3GgbFyYf6Bh36h/AKZ0HP7FeERZ7Lmw=",
+      "now": "2026-09-07T10:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": false,
+        "error": "mesin_lain",
+        "allowed": false,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "lease mengaku offline tanpa mengikat mesin",
+      "why": "DITOLAK, bukan diterima dengan peringatan: ia berlaku di berapa pun server sekaligus",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6MjUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwib2ZmbGluZSI6dHJ1ZSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNy0wMy0wNVQxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjctMDMtMDVUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjB9",
+      "signature": "vault:v1:FJMdRmH1hFGw1W+pE3Gk0tNezMMTCanVXGr63rj7Wl9P4PuBbgSY9O7IjJfPmN1Ibk1U1YI9h7tjOnZIXKPoBw==",
+      "key_name": "license-signing-v1",
+      "machine_key_base64": "ANBaHR6iUTltVXr71FiLPG2Z2+uXL+0QoyVi6ibc3Po=",
+      "now": "2026-09-07T10:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": false,
+        "error": "offline_tanpa_pengikatan",
+        "allowed": false,
+        "offline": false,
+        "schema_ahead": false
+      }
+    },
+    {
+      "name": "lease dipalsukan",
+      "why": "satu byte diubah sesudah ditandatangani; verifikasi WAJIB gagal",
+      "lease_base64": "eyJpbnN0YWxsYXRpb25faWQiOiJpbnNfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDAxIiwib3JnYW5pemF0aW9uX2lkIjoib3JnXzAxTTFLT05UUkFLMDAwMDAwMDAwMDAwMDAxIiwiYXBwbGljYXRpb25faWQiOiJhcHBfMDFNMUtPTlRSQUswMDAwMDAwMDAwMDAwMDEiLCJwcm9kdWN0X2NvZGUiOiJnYXJtZW50IiwiZ3JhbnRlZCI6dHJ1ZSwicGxhbl9jb2RlIjoicHJvIiwicGxhbl9uYW1lIjoiUHJvIiwic3RhdHVzIjoiYWN0aXZlIiwiZW50cmllcyI6W3sia2V5IjoidXNlcnMubWF4IiwidmFsdWVfdHlwZSI6ImludGVnZXIiLCJib29sZWFuIjpmYWxzZSwiaW50ZWdlciI6OTUsInRleHQiOiIiLCJ1bmxpbWl0ZWQiOmZhbHNlfSx7ImtleSI6ImJhY2t1cC5lbmFibGVkIiwidmFsdWVfdHlwZSI6ImJvb2xlYW4iLCJib29sZWFuIjp0cnVlLCJpbnRlZ2VyIjowLCJ0ZXh0IjoiIiwidW5saW1pdGVkIjpmYWxzZX1dLCJzY2hlbWFfdmVyc2lvbiI6MSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wNlQxMDowMDowMFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wOS0wN1QxMDowMDowMFoiLCJncmFjZV91bnRpbCI6IjIwMjYtMDktMTBUMTA6MDA6MDBaIiwiaGVhcnRiZWF0X3NlY29uZHMiOjkwMH0=",
+      "signature": "vault:v1:w0w7PXlIZtFRNZ+ycrCxtvkwZED4kwsCjnr1M4GSkrkjN6G3aaVTXhZ/0pZ9rQu72OJIJYAjc4f0A99B2lm9AA==",
+      "key_name": "license-signing-v1",
+      "now": "2026-09-06T11:00:00Z",
+      "skew_seconds": 0,
+      "expect": {
+        "verified": false,
+        "error": "tanda_tangan",
+        "allowed": false,
+        "offline": false,
+        "schema_ahead": false
+      }
+    }
+  ]
+}

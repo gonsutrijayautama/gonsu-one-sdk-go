@@ -14,8 +14,8 @@ import (
 	gonsu "github.com/gonsutrijayautama/gonsu-one-sdk-go"
 )
 
-// platformPalsu meniru /license/v1 secukupnya untuk menguji SDK.
-type platformPalsu struct {
+// fakePlatform meniru /license/v1 secukupnya untuk menguji SDK.
+type fakePlatform struct {
 	server *httptest.Server
 	key    ed25519.PrivateKey
 	issued time.Time
@@ -23,7 +23,7 @@ type platformPalsu struct {
 	permintaan int
 }
 
-func platformBaru(t *testing.T, issued time.Time) *platformPalsu {
+func newFakePlatform(t *testing.T, issued time.Time) *fakePlatform {
 	t.Helper()
 
 	_, private, err := ed25519.GenerateKey(nil)
@@ -31,7 +31,7 @@ func platformBaru(t *testing.T, issued time.Time) *platformPalsu {
 		t.Fatalf("membangkitkan kunci vendor: %v", err)
 	}
 
-	platform := &platformPalsu{key: private, issued: issued}
+	platform := &fakePlatform{key: private, issued: issued}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/license/v1/activate", platform.jawab)
 	mux.HandleFunc("/license/v1/heartbeat", func(w http.ResponseWriter, r *http.Request) {
@@ -61,8 +61,8 @@ func platformBaru(t *testing.T, issued time.Time) *platformPalsu {
 	return platform
 }
 
-func (p *platformPalsu) jawab(w http.ResponseWriter, _ *http.Request) {
-	lease := leaseContoh(p.issued)
+func (p *fakePlatform) jawab(w http.ResponseWriter, _ *http.Request) {
+	lease := sampleLease(p.issued)
 	signed := gonsu.SignedLease{}
 	payload, _ := json.Marshal(lease)
 	signed.Lease = encode(payload)
@@ -79,7 +79,7 @@ func (p *platformPalsu) jawab(w http.ResponseWriter, _ *http.Request) {
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-func (p *platformPalsu) vendorKey() gonsu.VendorKey {
+func (p *fakePlatform) vendorKey() gonsu.VendorKey {
 	public, _ := p.key.Public().(ed25519.PublicKey)
 	return gonsu.VendorKey(public)
 }
@@ -92,7 +92,7 @@ func encode(payload []byte) string {
 // dihubungi sama sekali, dan berhenti sendiri setelah masa tenggang habis.
 func TestInstalasiBertahanSaatPlatformTidakDapatDihubungi(t *testing.T) {
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	platform := platformBaru(t, issued)
+	platform := newFakePlatform(t, issued)
 	stateDir := t.TempDir()
 
 	sekarang := issued.Add(time.Minute)
@@ -159,7 +159,7 @@ func TestInstalasiBertahanSaatPlatformTidakDapatDihubungi(t *testing.T) {
 // menerima lease sama sekali.
 func TestCacheYangDiubahDitolak(t *testing.T) {
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	platform := platformBaru(t, issued)
+	platform := newFakePlatform(t, issued)
 	stateDir := t.TempDir()
 
 	options := gonsu.Options{
@@ -188,7 +188,7 @@ func TestCacheYangDiubahDitolak(t *testing.T) {
 	if err := json.Unmarshal(raw, &signed); err != nil {
 		t.Fatalf("membaca cache: %v", err)
 	}
-	diubah := leaseContoh(issued)
+	diubah := sampleLease(issued)
 	diubah.PlanCode = "enterprise"
 	diubah.GraceUntil = issued.AddDate(10, 0, 0)
 	payload, _ := json.Marshal(diubah)
@@ -211,7 +211,7 @@ func TestCacheYangDiubahDitolak(t *testing.T) {
 // dapat dipakai berapa pun banyaknya instalasi.
 func TestLeaseMilikInstalasiLainDitolak(t *testing.T) {
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	platform := platformBaru(t, issued)
+	platform := newFakePlatform(t, issued)
 	stateDir := t.TempDir()
 
 	license, err := gonsu.Open(gonsu.Options{
@@ -246,7 +246,7 @@ func TestLeaseMilikInstalasiLainDitolak(t *testing.T) {
 
 func TestHeartbeatMembawaTandaTangan(t *testing.T) {
 	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
-	platform := platformBaru(t, issued)
+	platform := newFakePlatform(t, issued)
 
 	license, err := gonsu.Open(gonsu.Options{
 		BaseURL:        platform.server.URL,

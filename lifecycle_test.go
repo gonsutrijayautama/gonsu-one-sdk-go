@@ -32,7 +32,7 @@ func TestPublicKey_TetapSamaAntarPembukaan(t *testing.T) {
 		t.Helper()
 		license, err := gonsu.Open(gonsu.Options{
 			BaseURL: "https://api.contoh.invalid", InstallationID: "ins_01M1",
-			StateDir: stateDir, VendorKeys: kunciVendorUji(t),
+			StateDir: stateDir, VendorKeys: testVendorKeys(t),
 		})
 		if err != nil {
 			t.Fatalf("Open: %v", err)
@@ -53,7 +53,7 @@ func TestPublicKey_TetapSamaAntarPembukaan(t *testing.T) {
 	}
 }
 
-func kunciVendorUji(t *testing.T) []gonsu.VendorKey {
+func testVendorKeys(t *testing.T) []gonsu.VendorKey {
 	t.Helper()
 	public, _, err := ed25519.GenerateKey(nil)
 	if err != nil {
@@ -107,7 +107,7 @@ func TestMustVendorKeys_PanicSaatSalah(t *testing.T) {
 // LISENSI OFFLINE
 // ---------------------------------------------------------------------------
 
-func leaseOfflineUji(t *testing.T, key ed25519.PrivateKey, publicKeyMesin string) gonsu.SignedLease {
+func testOfflineLease(t *testing.T, key ed25519.PrivateKey, publicKeyMesin string) gonsu.SignedLease {
 	t.Helper()
 
 	terbit := time.Now().UTC()
@@ -141,7 +141,7 @@ func TestInstallOffline_DipasangDanBertahan(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
-	if err := license.InstallOffline(leaseOfflineUji(t, private, license.PublicKey())); err != nil {
+	if err := license.InstallOffline(testOfflineLease(t, private, license.PublicKey())); err != nil {
 		t.Fatalf("InstallOffline: %v", err)
 	}
 	if !license.Status().Allowed() {
@@ -178,7 +178,7 @@ func TestInstallOffline_YangDitolakTidakDisimpan(t *testing.T) {
 
 	// Terikat pada mesin LAIN.
 	mesinLain, _, _ := ed25519.GenerateKey(nil)
-	err = license.InstallOffline(leaseOfflineUji(t, private,
+	err = license.InstallOffline(testOfflineLease(t, private,
 		base64.StdEncoding.EncodeToString(mesinLain)))
 	if !errors.Is(err, gonsu.ErrLeaseBukanUntukMesinIni) {
 		t.Fatalf("lisensi mesin lain diterima: %v", err)
@@ -199,7 +199,7 @@ func TestDeactivate_MelepaskanDanMembuangLeaseLokal(t *testing.T) {
 	t.Parallel()
 
 	issued := time.Now().UTC()
-	platform := platformBaru(t, issued)
+	platform := newFakePlatform(t, issued)
 	stateDir := t.TempDir()
 
 	license, err := gonsu.Open(gonsu.Options{
@@ -238,7 +238,7 @@ func TestDeactivate_GONSUTidakTerjangkauTetapMembuangLease(t *testing.T) {
 	t.Parallel()
 
 	issued := time.Now().UTC()
-	platform := platformBaru(t, issued)
+	platform := newFakePlatform(t, issued)
 	stateDir := t.TempDir()
 
 	license, err := gonsu.Open(gonsu.Options{
@@ -271,17 +271,17 @@ func TestDeactivate_GONSUTidakTerjangkauTetapMembuangLease(t *testing.T) {
 func TestDeactivate_MemanggilEndpointYangBenar(t *testing.T) {
 	t.Parallel()
 
-	var jalur, tandaTangan string
+	var jalur, signature string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jalur = r.URL.Path
-		tandaTangan = r.Header.Get("X-GONSU-Signature")
+		signature = r.Header.Get("X-GONSU-Signature")
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	t.Cleanup(server.Close)
 
 	license, err := gonsu.Open(gonsu.Options{
 		BaseURL: server.URL, InstallationID: "ins_01M1",
-		StateDir: t.TempDir(), VendorKeys: kunciVendorUji(t),
+		StateDir: t.TempDir(), VendorKeys: testVendorKeys(t),
 	})
 	if err != nil {
 		t.Fatalf("Open: %v", err)
@@ -292,7 +292,7 @@ func TestDeactivate_MemanggilEndpointYangBenar(t *testing.T) {
 	if jalur != "/license/v1/deactivate" {
 		t.Fatalf("jalur = %q", jalur)
 	}
-	if tandaTangan == "" {
+	if signature == "" {
 		t.Fatal("permintaan pencopotan tidak ditandatangani")
 	}
 }
@@ -317,7 +317,7 @@ func TestCheckUpdate_MembacaTawaranRilis(t *testing.T) {
 
 	license, err := gonsu.Open(gonsu.Options{
 		BaseURL: server.URL, InstallationID: "ins_01M1",
-		StateDir: t.TempDir(), VendorKeys: kunciVendorUji(t), Version: "1.0.0",
+		StateDir: t.TempDir(), VendorKeys: testVendorKeys(t), Version: "1.0.0",
 	})
 	if err != nil {
 		t.Fatalf("Open: %v", err)
@@ -348,7 +348,7 @@ func TestRegistryCredential_Dibaca(t *testing.T) {
 
 	license, err := gonsu.Open(gonsu.Options{
 		BaseURL: server.URL, InstallationID: "ins_01M1",
-		StateDir: t.TempDir(), VendorKeys: kunciVendorUji(t),
+		StateDir: t.TempDir(), VendorKeys: testVendorKeys(t),
 	})
 	if err != nil {
 		t.Fatalf("Open: %v", err)
@@ -383,7 +383,7 @@ func TestIsUnauthorized_MembedakanPenolakanDariGangguan(t *testing.T) {
 
 	license, err := gonsu.Open(gonsu.Options{
 		BaseURL: server.URL, InstallationID: "ins_01M1",
-		StateDir: t.TempDir(), VendorKeys: kunciVendorUji(t),
+		StateDir: t.TempDir(), VendorKeys: testVendorKeys(t),
 	})
 	if err != nil {
 		t.Fatalf("Open: %v", err)

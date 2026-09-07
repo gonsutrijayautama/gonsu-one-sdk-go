@@ -108,13 +108,13 @@ var ErrBadLeaseSignature = errors.New("tanda tangan lease tidak sah")
 // Urutannya menentukan: verifikasi lebih dulu, urai kemudian. Mengurai lebih
 // dulu berarti data yang belum dipercaya sudah masuk ke dalam struktur program.
 func VerifyLease(keys []VendorKey, signed SignedLease) (Lease, error) {
-	dipakai := 0
+	usable := 0
 	for _, key := range keys {
 		if len(key) == ed25519.PublicKeySize {
-			dipakai++
+			usable++
 		}
 	}
-	if dipakai == 0 {
+	if usable == 0 {
 		return Lease{}, errors.New("tidak ada kunci vendor yang dipasang")
 	}
 
@@ -136,17 +136,17 @@ func VerifyLease(keys []VendorKey, signed SignedLease) (Lease, error) {
 	// membiarkan penyusup mengarahkan verifikasi — tidak berbahaya selama
 	// seluruh kandidatnya kunci GONSU, tetapi tetap kebiasaan yang salah.
 	// Ia hanya dipakai untuk diagnosis.
-	cocok := false
+	verified := false
 	for _, key := range keys {
 		if len(key) != ed25519.PublicKeySize {
 			continue
 		}
 		if ed25519.Verify(ed25519.PublicKey(key), payload, signature) {
-			cocok = true
+			verified = true
 			break
 		}
 	}
-	if !cocok {
+	if !verified {
 		return Lease{}, ErrBadLeaseSignature
 	}
 

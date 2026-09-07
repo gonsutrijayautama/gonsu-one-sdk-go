@@ -12,7 +12,7 @@ import (
 	gonsu "github.com/gonsutrijayautama/gonsu-one-sdk-go"
 )
 
-func pasanganKunci(t *testing.T) (ed25519.PublicKey, ed25519.PrivateKey) {
+func newKeypair(t *testing.T) (ed25519.PublicKey, ed25519.PrivateKey) {
 	t.Helper()
 	public, private, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -21,7 +21,7 @@ func pasanganKunci(t *testing.T) (ed25519.PublicKey, ed25519.PrivateKey) {
 	return public, private
 }
 
-func tandaTangan(t *testing.T, key ed25519.PrivateKey, lease gonsu.Lease, nama string) gonsu.SignedLease {
+func signature(t *testing.T, key ed25519.PrivateKey, lease gonsu.Lease, nama string) gonsu.SignedLease {
 	t.Helper()
 	payload, err := json.Marshal(lease)
 	if err != nil {
@@ -41,11 +41,11 @@ func tandaTangan(t *testing.T, key ed25519.PrivateKey, lease gonsu.Lease, nama s
 // Inilah alasan VendorKeys jamak: pada hari rotasi, produk memegang kunci lama
 // DAN baru sekaligus. Kalau hanya satu yang bisa dipegang, setiap pemasangan
 // berhenti memverifikasi pada detik GONSU berpindah kunci.
-func TestRotasi_LeaseKunciBaruDanLamaSamaSamaDiterima(t *testing.T) {
+func TestRotation_LeaseKunciBaruDanLamaSamaSamaDiterima(t *testing.T) {
 	t.Parallel()
 
-	lamaPub, lamaPriv := pasanganKunci(t)
-	baruPub, baruPriv := pasanganKunci(t)
+	lamaPub, lamaPriv := newKeypair(t)
+	baruPub, baruPriv := newKeypair(t)
 	dipercaya := []gonsu.VendorKey{gonsu.VendorKey(lamaPub), gonsu.VendorKey(baruPub)}
 
 	terbit := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
@@ -58,7 +58,7 @@ func TestRotasi_LeaseKunciBaruDanLamaSamaSamaDiterima(t *testing.T) {
 		"kunci lama": lamaPriv,
 		"kunci baru": baruPriv,
 	} {
-		if _, err := gonsu.VerifyLease(dipercaya, tandaTangan(t, priv, lease, "license-signing-v1")); err != nil {
+		if _, err := gonsu.VerifyLease(dipercaya, signature(t, priv, lease, "license-signing-v1")); err != nil {
 			t.Fatalf("%s ditolak: %v", nama, err)
 		}
 	}
@@ -66,18 +66,18 @@ func TestRotasi_LeaseKunciBaruDanLamaSamaSamaDiterima(t *testing.T) {
 
 // Kunci yang TIDAK ada di daftar tetap ditolak. Rotasi memperluas daftar, ia
 // tidak melonggarkan pemeriksaannya.
-func TestRotasi_KunciDiLuarDaftarTetapDitolak(t *testing.T) {
+func TestRotation_KunciDiLuarDaftarTetapDitolak(t *testing.T) {
 	t.Parallel()
 
-	dipercayaPub, _ := pasanganKunci(t)
-	_, asingPriv := pasanganKunci(t)
+	dipercayaPub, _ := newKeypair(t)
+	_, asingPriv := newKeypair(t)
 
 	terbit := time.Now().UTC()
 	lease := gonsu.Lease{InstallationID: "ins_01M1", IssuedAt: terbit, ExpiresAt: terbit.Add(time.Hour)}
 
 	_, err := gonsu.VerifyLease(
 		[]gonsu.VendorKey{gonsu.VendorKey(dipercayaPub)},
-		tandaTangan(t, asingPriv, lease, "license-signing-v1"),
+		signature(t, asingPriv, lease, "license-signing-v1"),
 	)
 	if !errors.Is(err, gonsu.ErrBadLeaseSignature) {
 		t.Fatalf("tanda tangan kunci asing DITERIMA: %v", err)
@@ -86,14 +86,14 @@ func TestRotasi_KunciDiLuarDaftarTetapDitolak(t *testing.T) {
 
 // KeyName berada di LUAR payload yang ditandatangani, jadi ia dapat ditulis
 // siapa pun yang memegang berkasnya. Ia tidak boleh mempengaruhi hasil.
-func TestRotasi_KeyNamePalsuTidakMengubahHasil(t *testing.T) {
+func TestRotation_KeyNamePalsuTidakMengubahHasil(t *testing.T) {
 	t.Parallel()
 
-	pub, priv := pasanganKunci(t)
+	pub, priv := newKeypair(t)
 	terbit := time.Now().UTC()
 	lease := gonsu.Lease{InstallationID: "ins_01M1", IssuedAt: terbit, ExpiresAt: terbit.Add(time.Hour)}
 
-	signed := tandaTangan(t, priv, lease, "kunci-yang-tidak-pernah-ada")
+	signed := signature(t, priv, lease, "kunci-yang-tidak-pernah-ada")
 	if _, err := gonsu.VerifyLease([]gonsu.VendorKey{gonsu.VendorKey(pub)}, signed); err != nil {
 		t.Fatalf("KeyName yang salah membuat lease sah ikut ditolak: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestRotasi_KeyNamePalsuTidakMengubahHasil(t *testing.T) {
 // Arah kelonggaran HANYA memperpanjang — kesalahan karena longgar berarti
 // melayani beberapa menit lebih lama; kesalahan karena ketat berarti pelanggan
 // yang membayar mendadak berhenti dilayani.
-func TestToleransiJam_JamYangMajuTidakMematikanLisensi(t *testing.T) {
+func TestClockSkew_JamYangMajuTidakMematikanLisensi(t *testing.T) {
 	t.Parallel()
 
 	terbit := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
@@ -130,7 +130,7 @@ func TestToleransiJam_JamYangMajuTidakMematikanLisensi(t *testing.T) {
 
 // Toleransi tidak boleh menjadi cara memperpanjang lisensi: lewat jauh tetap
 // lewat.
-func TestToleransiJam_TidakMenutupiKedaluwarsaSungguhan(t *testing.T) {
+func TestClockSkew_TidakMenutupiKedaluwarsaSungguhan(t *testing.T) {
 	t.Parallel()
 
 	terbit := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
@@ -146,7 +146,7 @@ func TestToleransiJam_TidakMenutupiKedaluwarsaSungguhan(t *testing.T) {
 }
 
 // Toleransi negatif diperlakukan sebagai nol, bukan sebagai pemendekan.
-func TestToleransiJam_NegatifTidakMemperpendek(t *testing.T) {
+func TestClockSkew_NegatifTidakMemperpendek(t *testing.T) {
 	t.Parallel()
 
 	terbit := time.Now().UTC()
@@ -166,7 +166,7 @@ func TestToleransiJam_NegatifTidakMemperpendek(t *testing.T) {
 
 // Skema yang lebih baru TIDAK menghentikan produk. Menghentikannya berarti
 // setiap pemasangan pelanggan mati pada hari GONSU memperbarui servernya.
-func TestSkema_VersiLebihBaruTetapDilayaniTetapiDitandai(t *testing.T) {
+func TestSchema_VersiLebihBaruTetapDilayaniTetapiDitandai(t *testing.T) {
 	t.Parallel()
 
 	terbit := time.Now().UTC()
@@ -187,7 +187,7 @@ func TestSkema_VersiLebihBaruTetapDilayaniTetapiDitandai(t *testing.T) {
 
 // Lease lama tanpa field versi diperlakukan sebagai versi 1, bukan sebagai
 // "lebih baru" maupun sebagai cacat.
-func TestSkema_LeaseLamaTanpaVersiDiperlakukanSebagaiSatu(t *testing.T) {
+func TestSchema_LeaseLamaTanpaVersiDiperlakukanSebagaiSatu(t *testing.T) {
 	t.Parallel()
 
 	terbit := time.Now().UTC()
