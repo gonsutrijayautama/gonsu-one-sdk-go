@@ -59,6 +59,29 @@ type Response struct {
 	// lease yang tidak dapat diverifikasi.
 	Lease *SignedLease `json:"lease"`
 	Owner *Person      `json:"owner"`
+	// OIDC nil berarti login produk belum diterbitkan untuk pemasangan ini.
+	//
+	// Tidak memuat `client_secret`, dan itu bukan kelalaian: pemasangan
+	// self-host memakai client PUBLIK dengan PKCE. Rahasia yang ditaruh di
+	// mesin yang administratornya pelanggan sendiri tidak melindungi apa pun
+	// dari pemilik mesin itu, sedangkan PKCE menutup kasus yang tersisa.
+	OIDC *OIDCConfig `json:"oidc"`
+}
+
+// OIDCConfig adalah nilai yang dibutuhkan produk untuk memulai login.
+//
+// Ketiganya BUKAN rahasia. `client_id` bahkan terlihat di address bar setiap
+// kali orang login, dan `redirect_uri` adalah alamat produk itu sendiri.
+type OIDCConfig struct {
+	// Issuer adalah penerbit token. Produk WAJIB mencocokkannya dengan klaim
+	// `iss` pada id_token — kalau tidak, token dari penerbit lain akan lolos.
+	Issuer string `json:"issuer"`
+	// ClientID dipakai menyusun URL authorize.
+	ClientID string `json:"client_id"`
+	// RedirectURI diserahkan supaya produk tidak menebaknya sendiri. Produk
+	// yang menebak akan menebak berbeda dari yang terdaftar, dan penyedia
+	// identitas menolaknya tanpa menyebut nilai mana yang ia harapkan.
+	RedirectURI string `json:"redirect_uri"`
 }
 
 // APIError adalah penolakan dari GONSU beserta kodenya.

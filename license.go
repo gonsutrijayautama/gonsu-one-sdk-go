@@ -90,6 +90,17 @@ type License struct {
 	lease  Lease
 	signed SignedLease
 	fresh  bool
+	// oidc adalah konfigurasi login dari sapaan terakhir yang berhasil.
+	//
+	// DI MEMORI saja, tidak disimpan ke disk seperti lease — dan itu bukan
+	// kelalaian. Login baru MUSTAHIL ketika GONSU tidak terjangkau: pengguna
+	// harus diarahkan ke penerbit token, dan penerbit itu adalah GONSU.
+	// Menyimpannya untuk saat terputus berarti menyiapkan nilai untuk alur yang
+	// tidak dapat berjalan.
+	//
+	// Berbeda dari lease, yang justru ADA supaya produk tetap melayani orang
+	// yang SUDAH masuk ketika GONSU tidak terjangkau.
+	oidc *OIDCConfig
 }
 
 // Open menyiapkan SDK: memuat kunci instalasi dan lease yang tersimpan.
@@ -278,8 +289,35 @@ func (l *License) Refresh(ctx context.Context) error {
 	return nil
 }
 
+// OIDC mengembalikan konfigurasi login dari sapaan terakhir yang berhasil.
+//
+// Nil berarti belum pernah diterima: GONSU belum menerbitkan login untuk
+// pemasangan ini, atau belum ada satu pun sapaan yang berhasil sejak process
+// ini mulai. Keduanya berarti hal yang sama bagi produk — login belum dapat
+// dimulai — dan keduanya sembuh sendiri pada sapaan berikutnya.
+func (l *License) OIDC() *OIDCConfig {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	if l.oidc == nil {
+		return nil
+	}
+	salinan := *l.oidc
+	return &salinan
+}
+
 // adopt memasang lease dari sebuah jawaban dan menyimpannya ke disk.
 func (l *License) adopt(response Response) {
+	// Konfigurasi login dipasang LEBIH DULU, terpisah dari lease. Platform
+	// tanpa penandatangan lease tetap dapat menerbitkan login, dan keluar dari
+	// fungsi ini karena lease yang tidak ada akan ikut membuang yang satunya.
+	if response.OIDC != nil {
+		l.mu.Lock()
+		salinan := *response.OIDC
+		l.oidc = &salinan
+		l.mu.Unlock()
+	}
+
 	if response.Lease == nil {
 		// Platform tanpa penandatangan. Instalasi tetap berjalan selama masih
 		// terhubung, tetapi tidak ada yang dapat disimpan untuk saat terputus.
