@@ -369,6 +369,59 @@ func (c *Client) RegistryCredential(ctx context.Context) (RegistryCredential, er
 	return credential, nil
 }
 
+// pathIdentities adalah jalur pemberian identitas login.
+const pathIdentities = "/license/v1/identities"
+
+// Identity adalah orang yang kini dapat login ke pemasangan ini.
+type Identity struct {
+	// Subject adalah `sub` pada id_token, dan INILAH yang disimpan produk
+	// sebagai pengenal orang ini. Email dapat berubah; subject tidak.
+	Subject     string `json:"subject"`
+	Email       string `json:"email"`
+	DisplayName string `json:"display_name"`
+
+	// TemporaryPassword hanya terisi ketika akunnya memang BARU dibuat.
+	//
+	// Kosong berarti orang ini sudah punya akun GONSU sebelumnya — keadaan
+	// yang biasa, dan BUKAN kegagalan. Ia login dengan sandi yang sudah
+	// dimilikinya.
+	//
+	// RAHASIA, dan hanya ada pada jawaban ini. Tidak disimpan GONSU dan tidak
+	// dapat diminta ulang: yang menerimanya harus menampilkannya sekali lalu
+	// melupakannya.
+	TemporaryPassword string `json:"temporary_password,omitempty"`
+}
+
+// ProvisionIdentity meminta GONSU membuatkan akses login untuk seseorang.
+//
+// Dipakai layar "beri akses login" di dalam produk: pelanggan mengetik email
+// karyawannya, produk memanggil ini, lalu menyimpan Subject yang dikembalikan
+// sebagai pengenal orang itu di dalam dirinya sendiri.
+//
+// PERAN tidak dikirim dan tidak diterima. Produk yang memutuskan orang ini
+// menjadi apa di dalam dirinya; GONSU hanya menerbitkan identitasnya.
+//
+// KUOTA ditegakkan GONSU per pemasangan per hari, dan ditolak sebagai APIError
+// berstatus 429. Yang menghitung kursi adalah produk, dari `seats.max` pada hak
+// pakainya — keduanya batas yang berbeda dan keduanya berlaku.
+func (c *Client) ProvisionIdentity(ctx context.Context, email, displayName string) (Identity, error) {
+	body, err := json.Marshal(map[string]string{"email": email, "display_name": displayName})
+	if err != nil {
+		return Identity{}, fmt.Errorf("menyusun permintaan identitas: %w", err)
+	}
+
+	payload, err := c.request(ctx, pathIdentities, body, true)
+	if err != nil {
+		return Identity{}, err
+	}
+
+	var identity Identity
+	if err := json.Unmarshal(payload, &identity); err != nil {
+		return Identity{}, fmt.Errorf("jawaban identitas tidak dapat dibaca: %w", err)
+	}
+	return identity, nil
+}
+
 // ErrInsecureBaseURL berarti alamat GONSU memakai http polos ke host yang bukan
 // dirinya sendiri.
 var ErrInsecureBaseURL = errors.New("BaseURL wajib https kecuali ke localhost")

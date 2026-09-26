@@ -90,6 +90,13 @@ type License struct {
 	lease  Lease
 	signed SignedLease
 	fresh  bool
+	// owner adalah pemilik organization dari sapaan terakhir yang berhasil.
+	//
+	// DI MEMORI saja, alasan yang sama persis dengan oidc di bawah: ia dipakai
+	// membuat administrator pertama, dan administrator itu harus LOGIN —
+	// sesuatu yang mustahil ketika GONSU tidak terjangkau. Menyimpannya ke disk
+	// berarti menyiapkan nilai untuk alur yang tidak dapat berjalan.
+	owner *Person
 	// oidc adalah konfigurasi login dari sapaan terakhir yang berhasil.
 	//
 	// DI MEMORI saja, tidak disimpan ke disk seperti lease — dan itu bukan
@@ -289,6 +296,30 @@ func (l *License) Refresh(ctx context.Context) error {
 	return nil
 }
 
+// Owner mengembalikan pemilik organization dari sapaan terakhir yang berhasil.
+//
+// Ada untuk SATU hal: menjawab siapa yang berhak menjadi administrator pertama
+// pada pemasangan yang tabel penggunanya masih kosong. Tanpanya,
+// pemasangan yang baru berdiri tidak punya seorang pun yang dapat masuk —
+// produk memeriksa orangnya terhadap tabel penggunanya sendiri, dan tabel itu
+// tidak punya cara sah terisi yang pertama.
+//
+// BUKAN izin masuk, dan jangan diperlakukan begitu. Ia keterangan tentang siapa
+// yang membeli langganan ini. Produk memakainya HANYA ketika tabelnya kosong;
+// sesudah ada satu baris, pemeriksaan yang berlaku adalah tabel itu sendiri.
+//
+// Nil berarti belum pernah diterima — GONSU belum punya penyedia identitas,
+// atau belum ada sapaan yang berhasil sejak process ini mulai.
+func (l *License) Owner() *Person {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+	if l.owner == nil {
+		return nil
+	}
+	salinan := *l.owner
+	return &salinan
+}
+
 // OIDC mengembalikan konfigurasi login dari sapaan terakhir yang berhasil.
 //
 // Nil berarti belum pernah diterima: GONSU belum menerbitkan login untuk
@@ -315,6 +346,16 @@ func (l *License) adopt(response Response) {
 		l.mu.Lock()
 		salinan := *response.OIDC
 		l.oidc = &salinan
+		l.mu.Unlock()
+	}
+
+	// Pemilik diadopsi terpisah dari lease, alasan yang sama dengan OIDC di
+	// atas: platform tanpa penandatangan lease tetap dapat menyebut pemiliknya,
+	// dan keluar lebih awal karena lease yang tidak ada akan ikut membuangnya.
+	if response.Owner != nil {
+		l.mu.Lock()
+		salinan := *response.Owner
+		l.owner = &salinan
 		l.mu.Unlock()
 	}
 
@@ -365,6 +406,16 @@ func (l *License) CheckUpdate(ctx context.Context) (UpdateOffer, error) {
 // RegistryCredential meminta kredensial untuk menarik image produk.
 func (l *License) RegistryCredential(ctx context.Context) (RegistryCredential, error) {
 	return l.client.RegistryCredential(ctx)
+}
+
+// ProvisionIdentity meminta GONSU membuatkan akses login untuk seseorang.
+//
+// TIDAK memakai lease dari cache, dan tidak dapat: menerbitkan identitas
+// menuntut GONSU yang terjangkau. Pemasangan yang sedang terputus tetap
+// melayani orang-orang yang sudah punya akses — yang tidak dapat dilakukannya
+// adalah menambah orang baru, dan itu memang bukan pekerjaan yang mendesak.
+func (l *License) ProvisionIdentity(ctx context.Context, email, displayName string) (Identity, error) {
+	return l.client.ProvisionIdentity(ctx, email, displayName)
 }
 
 // Status mengembalikan keadaan hak pakai saat ini.

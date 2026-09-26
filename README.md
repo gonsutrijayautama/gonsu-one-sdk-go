@@ -50,10 +50,8 @@ var vendorKeys string
 license, err := gonsu.Open(gonsu.Options{
 	BaseURL: "https://api.gonsu.cloud",
 	// Di cloud, GONSU mengisinya sendiri lewat Secret aplikasi — tidak ada
-	// yang menempelkannya dengan tangan. Di self-host, installer
-	// yang menuliskannya ke.env dari token yang diberikan Portal.
-	//
-	// Dari sudut pandang produk, keduanya sama: baca environment.
+	// yang menempelkannya dengan tangan. Di paket self-host, SDK ini
+	// dijalankan agent, bukan produk; lihat "Dari mana nilainya datang".
 	InstallationID: os.Getenv("GONSU_INSTALLATION_ID"),
 	StateDir: "/var/lib/produk-anda/lisensi", // wajib bertahan antar restart
 	VendorKeys: gonsu.MustVendorKeys(strings.Split(vendorKeys, ",")...),
@@ -237,20 +235,32 @@ GONSU.
 
 ## Dari mana nilainya datang
 
-Produk Anda selalu membaca environment. Yang berbeda hanyalah siapa yang
-mengisinya, dan itu bukan urusan produk:
+Produk Anda selalu membaca environment, tetapi isinya BERBEDA per mode. Di cloud
+produk sendiri yang memakai SDK ini. Di paket self-host (`deploy/selfhost`) yang
+memakainya adalah **agent** di sebelah produk: installation ID, token aktivasi,
+dan kunci pemasangan berhenti di agent, dan produk hanya menerima alamat agent.
 
-| | Cloud (GONSU yang memasang) | Self-host |
+| | Cloud (GONSU yang memasang) | Self-host (paket `gonsu-selfhost`) |
 |---|---|---|
-| `GONSU_INSTALLATION_ID` | Secret aplikasi, dibuat GONSU saat deploy | installer menulis ke `.env` |
-| `GONSU_BASE_URL` | Secret aplikasi, alamat DALAM cluster | `.env` |
-| `GONSU_ACTIVATION_TOKEN` | Secret aplikasi, hanya saat memang dibutuhkan | dari Portal, sekali pakai |
-| `GONSU_STATE_DIR` | volume yang bertahan, disiapkan GONSU | direktori di host |
-| kunci publik GONSU | **ditanam saat build**, tidak pernah disuntikkan | sama |
+| `GONSU_INSTALLATION_ID` | Secret aplikasi, dibuat GONSU saat deploy | dipegang agent, tidak sampai ke produk |
+| `GONSU_BASE_URL` | Secret aplikasi, alamat DALAM cluster | dipegang agent |
+| `GONSU_ACTIVATION_TOKEN` | Secret aplikasi, hanya saat memang dibutuhkan | dipakai `install.sh` untuk agent, lalu dibuang |
+| `GONSU_STATE_DIR` | volume yang bertahan, disiapkan GONSU | volume milik agent |
+| `GONSU_ORGANIZATION_ID`, `GONSU_OWNER_SUBJECT`, `GONSU_OWNER_EMAIL` | Secret aplikasi — pemilik pemasangan, untuk admin pertama | tidak ada; field `organization_id` dan `owner` pada jawaban agent |
+| `GONSU_IDENTITY_TOKEN` | Secret aplikasi — bearer SEMPIT untuk `POST $GONSU_BASE_URL/license/v1/identities` | tidak ada; produk memanggil `POST http://agent:8099/v1/identities` |
+| `GONSU_LICENSE_URL` | tidak ada | `http://agent:8099/v1/license` — hak pakai yang sudah diverifikasi agent |
+| `GONSU_OIDC_URL` | tidak ada; login memakai `GONSU_OIDC_*` (lihat SDK login) | `http://agent:8099/v1/oidc` |
+| kunci publik GONSU | **ditanam saat build**, tidak pernah disuntikkan | ditanam di agent |
 
-Karena itu satu binary berjalan di kedua mode tanpa jalur kode yang berbeda —
-dan itu memang tujuannya: jalur yang hanya dipakai satu mode adalah jalur yang
-tidak pernah teruji.
+Keempat variabel pemilik dan identitas dapat TIDAK ADA — bukan kosong. Pemilik
+yang belum tercatat tidak ditulis ke Secret sama sekali, dan token identitas
+yang gagal diterbitkan saat deployment ikut hilang sampai deployment
+berikutnya. Periksa ada-tidaknya variabel, bukan isinya.
+
+Produk yang dijual untuk kedua mode karena itu punya dua jalur baca hak pakai:
+SDK ini di cloud, `GONSU_LICENSE_URL` di self-host. Bedakan keduanya dari
+ada-tidaknya `GONSU_LICENSE_URL`: ada berarti self-host (baca hak pakai dan
+daftarkan karyawan lewat agent), tidak ada berarti cloud (pakai SDK ini).
 
 ## Yang perlu diketahui operator
 
@@ -276,9 +286,9 @@ export GONSU_INSTALLATION_ID=ins_...
 export GONSU_ACTIVATION_TOKEN=...
 export GONSU_VENDOR_KEY=...
 
-go run./example/selfhost activate
-go run./example/selfhost run # matikan API GONSU: ia tetap berjalan
-go run./example/selfhost status # sekali baca, tanpa jaringan
+go run ./example/selfhost activate
+go run ./example/selfhost run # matikan API GONSU: ia tetap berjalan
+go run ./example/selfhost status # sekali baca, tanpa jaringan
 ```
 
 ## Peran pengguna tidak ada di sini
