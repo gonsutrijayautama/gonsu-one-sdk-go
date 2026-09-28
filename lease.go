@@ -165,6 +165,13 @@ func VerifyLease(keys []VendorKey, signed SignedLease) (Lease, error) {
 // satu-satunya yang membatasinya pada satu pemasangan.
 var ErrLeaseBukanUntukMesinIni = errors.New("lease offline diterbitkan untuk mesin lain")
 
+// ErrLeaseProdukLain berarti lease sah tetapi diterbitkan untuk produk lain
+// daripada Options.ProductCode.
+//
+// Seluruh produk GONSU diverifikasi dengan kunci yang sama, sehingga tanda
+// tangan saja tidak membedakan lisensi produk yang satu dari yang lain.
+var ErrLeaseProdukLain = errors.New("lease diterbitkan untuk produk lain")
+
 // ErrLeaseOfflineTanpaPengikatan berarti lease menyebut dirinya offline tetapi
 // tidak menyebut mesin mana pun.
 //

@@ -17,6 +17,20 @@ type Options struct {
 	BaseURL string
 	// InstallationID diberikan GONSU bersama token aktivasi. Bukan rahasia.
 	InstallationID string
+	// ProductCode adalah kode produk Anda di katalog GONSU, misalnya
+	// "garment". Tulis di dalam kode, jangan dibaca dari konfigurasi.
+	//
+	// Terisi berarti lease yang menyebut produk LAIN ditolak — saat dimuat dari
+	// disk, saat diterima dari GONSU, dan saat lisensi offline dipasang.
+	// Seluruh produk GONSU diverifikasi dengan kunci yang sama, jadi tanda
+	// tangan saja tidak membedakan lease produk A dari lease produk B: tanpa
+	// ProductCode, id pemasangan dan direktori state milik produk yang lebih
+	// murah cukup untuk menjalankan produk ini.
+	//
+	// Kosong berarti product_code tidak diperiksa sama sekali — perilaku SDK
+	// sebelum opsi ini ada, dipertahankan supaya produk yang sudah terpasang
+	// tidak berhenti hanya karena SDK-nya diperbarui. Isi selalu.
+	ProductCode string
 	// StateDir adalah direktori tempat kunci privat dan cache lease disimpan.
 	// Harus bertahan antar restart; kalau tidak, instalasi kehilangan
 	// identitasnya setiap kali produk dimulai ulang.
@@ -180,6 +194,12 @@ func Open(options Options) (*License, error) {
 			license.logger.Error("lease tersimpan milik instalasi lain dan diabaikan",
 				slog.String("lease_installation_id", lease.InstallationID),
 				slog.String("installation_id", options.InstallationID))
+		case !options.acceptsProduct(lease.ProductCode):
+			// Lease yang sah tetapi untuk produk lain. Tidak dihapus, dengan
+			// alasan yang sama seperti lease yang gagal diverifikasi.
+			license.logger.Error("lease tersimpan untuk produk lain dan diabaikan",
+				slog.String("lease_product_code", lease.ProductCode),
+				slog.String("product_code", options.ProductCode))
 		default:
 			license.lease = lease
 			license.signed = signed
@@ -187,6 +207,16 @@ func Open(options Options) (*License, error) {
 	}
 
 	return license, nil
+}
+
+// acceptsProduct melaporkan apakah lease untuk productCode boleh dipakai.
+//
+// ProductCode kosong menerima produk apa pun: perilaku sebelum opsi itu ada.
+// Lease tanpa product_code DITOLAK ketika ProductCode terisi — GONSU selalu
+// mengisinya, dan lease yang tidak menyebut produknya tidak dapat dibuktikan
+// milik produk ini.
+func (o Options) acceptsProduct(productCode string) bool {
+	return o.ProductCode == "" || productCode == o.ProductCode
 }
 
 // PublicKey mengembalikan kunci publik instalasi ini, base64 baku.
@@ -211,6 +241,10 @@ func (l *License) InstallOffline(signed SignedLease) error {
 	if lease.InstallationID != l.options.InstallationID {
 		return fmt.Errorf("%w: lisensi untuk instalasi %s, mesin ini %s",
 			ErrLeaseBukanUntukMesinIni, lease.InstallationID, l.options.InstallationID)
+	}
+	if !l.options.acceptsProduct(lease.ProductCode) {
+		return fmt.Errorf("%w: lisensi untuk produk %q, produk ini %q",
+			ErrLeaseProdukLain, lease.ProductCode, l.options.ProductCode)
 	}
 	if err := saveLease(l.options.StateDir, signed); err != nil {
 		return err
@@ -377,6 +411,15 @@ func (l *License) adopt(response Response) {
 	if lease.InstallationID != l.options.InstallationID {
 		l.logger.Error("lease dari GONSU milik instalasi lain",
 			slog.String("lease_installation_id", lease.InstallationID))
+		return
+	}
+	if !l.options.acceptsProduct(lease.ProductCode) {
+		// Pemasangan ini terdaftar untuk produk lain di GONSU — biasanya id
+		// pemasangan yang tertukar, atau ProductCode yang salah ketik. Lease
+		// yang sudah dipegang tidak diganti.
+		l.logger.Error("lease dari GONSU untuk produk lain",
+			slog.String("lease_product_code", lease.ProductCode),
+			slog.String("product_code", l.options.ProductCode))
 		return
 	}
 

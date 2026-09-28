@@ -53,6 +53,9 @@ license, err := gonsu.Open(gonsu.Options{
 	// yang menempelkannya dengan tangan. Di paket self-host, SDK ini
 	// dijalankan agent, bukan produk; lihat "Dari mana nilainya datang".
 	InstallationID: os.Getenv("GONSU_INSTALLATION_ID"),
+	// Kode produk Anda di katalog GONSU. Tulis di sini, jangan dari
+	// konfigurasi; lihat "Mengikat lease pada produk Anda".
+	ProductCode: "garment",
 	StateDir: "/var/lib/produk-anda/lisensi", // wajib bertahan antar restart
 	VendorKeys: gonsu.MustVendorKeys(strings.Split(vendorKeys, ",")...),
 	Version: version,
@@ -91,6 +94,35 @@ if batas, tanpaBatas := status.Limit("users.max"); !tanpaBatas && jumlah >= bata
 `Open` **tidak menyentuh jaringan**. Produk yang dimulai saat GONSU tidak dapat
 dihubungi tetap dapat berjalan dari lease di disk — itulah seluruh gunanya lease
 disimpan.
+
+## Mengikat lease pada produk Anda
+
+Seluruh produk GONSU diverifikasi dengan **kunci yang sama**. Tanda tangan
+membuktikan lease berasal dari GONSU, tetapi tidak membuktikan lease itu untuk
+produk **Anda**: tanpa pemeriksaan tambahan, lease sah milik produk lain dari
+pelanggan yang sama — id pemasangan dan direktori state-nya disalin — diterima
+begitu saja.
+
+`Options.ProductCode` menutupnya. Terisi berarti lease yang `product_code`-nya
+berbeda **ditolak**:
+
+| Saat | Akibat |
+|---|---|
+| `Open` memuat lease dari disk | lease diabaikan (tidak dihapus), status `unknown` |
+| `Activate` / `Refresh` menerima lease | lease tidak dipakai dan tidak disimpan; yang sudah dipegang tetap |
+| `InstallOffline` | galat `ErrLeaseProdukLain`, berkas tidak disimpan |
+
+Penolakan dicatat di `Logger` sebagai galat. `ProductCode` yang salah ketik
+karena itu terlihat sebagai produk yang tidak pernah aktif — periksa lognya.
+
+> **`ProductCode` kosong berarti `product_code` tidak diperiksa sama sekali.**
+> Itu perilaku SDK sebelum opsi ini ada, dipertahankan supaya produk yang sudah
+> terpasang tidak berhenti hanya karena SDK-nya diperbarui. Jangan mengandalkan
+> keadaan itu: isi `ProductCode` pada rilis produk Anda berikutnya.
+
+Tulis kodenya di dalam kode produk, bukan di environment — alasannya sama dengan
+kunci publik GONSU: nilai yang dapat diganti pemilik server tidak menjaga apa
+pun dari pemilik server.
 
 ## Dari mana kunci publik GONSU didapat
 
@@ -262,13 +294,20 @@ SDK ini di cloud, `GONSU_LICENSE_URL` di self-host. Bedakan keduanya dari
 ada-tidaknya `GONSU_LICENSE_URL`: ada berarti self-host (baca hak pakai dan
 daftarkan karyawan lewat agent), tidak ada berarti cloud (pakai SDK ini).
 
+Di jalur self-host, **bandingkan sendiri `product_code`** pada jawaban agent
+dengan kode produk Anda, dan perlakukan yang berbeda sebagai tidak berlisensi —
+padanan `ProductCode` di atas. Agent satu image untuk semua produk; ia hanya
+memeriksa produk bila `GONSU_PRODUCT_CODE` diisi di `.env` server, dan nilai itu
+dikuasai administrator server.
+
 ## Yang perlu diketahui operator
 
 - `StateDir` berisi kunci privat instalasi (`installation.key`, 0600) dan cache
  lease. Ia **harus bertahan antar restart**; kalau tidak, instalasi kehilangan
  identitasnya setiap kali produk dimulai ulang.
 - Jangan menyalin `StateDir` ke mesin lain. Lease terikat pada satu
- `installation_id` dan SDK menolak lease milik instalasi lain.
+ `installation_id` dan SDK menolak lease milik instalasi lain — dan, bila
+ `ProductCode` diisi, lease untuk produk lain.
 - Pencabutan lisensi berlaku ketika lease habis, bukan seketika. Dengan angka
  bawaan GONSU, jaraknya sampai 4 hari (masa berlaku 24 jam + tenggang 3 hari).
 - `Deactivate` melepaskan pemasangan di GONSU dan membuang lease lokalnya. Lease
@@ -283,6 +322,7 @@ melakukan apa pun selain melaporkan apa yang boleh dijalankannya:
 ```bash
 export GONSU_BASE_URL=https://api.gonsu.cloud
 export GONSU_INSTALLATION_ID=ins_...
+export GONSU_PRODUCT_CODE=garment   # contoh membacanya dari sini; produk sungguhan menulisnya di kode
 export GONSU_ACTIVATION_TOKEN=...
 export GONSU_VENDOR_KEY=...
 

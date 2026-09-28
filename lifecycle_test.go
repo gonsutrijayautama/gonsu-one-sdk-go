@@ -191,6 +191,48 @@ func TestInstallOffline_YangDitolakTidakDisimpan(t *testing.T) {
 	}
 }
 
+// Lisensi offline untuk produk lain ditolak SEBELUM disimpan, sama seperti
+// lisensi untuk mesin lain.
+func TestInstallOffline_ProdukLainDitolak(t *testing.T) {
+	t.Parallel()
+
+	public, private, _ := ed25519.GenerateKey(nil)
+	stateDir := t.TempDir()
+	license, err := gonsu.Open(gonsu.Options{
+		BaseURL: "https://api.contoh.invalid", InstallationID: "ins_01M1", ProductCode: "erp",
+		StateDir: stateDir, VendorKeys: []gonsu.VendorKey{gonsu.VendorKey(public)},
+	})
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+
+	terbit := time.Now().UTC()
+	payload, err := json.Marshal(gonsu.Lease{
+		InstallationID: "ins_01M1", ProductCode: "garment", Granted: true, PlanCode: "enterprise",
+		InstallationPublicKey: license.PublicKey(), Offline: true,
+		IssuedAt: terbit, ExpiresAt: terbit.Add(90 * 24 * time.Hour),
+		GraceUntil: terbit.Add(90 * 24 * time.Hour),
+	})
+	if err != nil {
+		t.Fatalf("menyusun lease: %v", err)
+	}
+	signed := gonsu.SignedLease{
+		Lease:     base64.StdEncoding.EncodeToString(payload),
+		Signature: "vault:v1:" + base64.StdEncoding.EncodeToString(ed25519.Sign(private, payload)),
+		KeyName:   "license-signing-v1",
+	}
+
+	if err := license.InstallOffline(signed); !errors.Is(err, gonsu.ErrLeaseProdukLain) {
+		t.Fatalf("lisensi produk lain diterima: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(stateDir, "lease.json")); !os.IsNotExist(err) {
+		t.Fatal("lease yang ditolak tetap ditulis ke disk")
+	}
+	if license.Status().Allowed() {
+		t.Fatal("hak diberikan padahal lisensinya ditolak")
+	}
+}
+
 // ---------------------------------------------------------------------------
 // MENCOPOT
 // ---------------------------------------------------------------------------

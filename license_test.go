@@ -271,3 +271,82 @@ func TestHeartbeatMembawaTandaTangan(t *testing.T) {
 		t.Fatal("status tidak ditandai segar setelah heartbeat berhasil")
 	}
 }
+
+// ---------------------------------------------------------------------------
+// PENGIKATAN PADA PRODUK
+// ---------------------------------------------------------------------------
+
+// Seluruh produk GONSU diverifikasi dengan kunci yang sama. Tanpa ProductCode,
+// lease sah milik produk lain — dari organization yang sama, dengan id
+// pemasangan dan direktori state yang disalin — diterima begitu saja.
+func TestProductCode_LeaseProdukLainDitolak(t *testing.T) {
+	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
+	platform := newFakePlatform(t, issued) // menerbitkan lease produk "garment"
+	stateDir := t.TempDir()
+
+	buka := func(productCode string) *gonsu.License {
+		t.Helper()
+		license, err := gonsu.Open(gonsu.Options{
+			BaseURL:        platform.server.URL,
+			InstallationID: "ins_01M1",
+			ProductCode:    productCode,
+			StateDir:       stateDir,
+			VendorKeys:     []gonsu.VendorKey{platform.vendorKey()},
+			Clock:          func() time.Time { return issued.Add(time.Minute) },
+		})
+		if err != nil {
+			t.Fatalf("membuka lisensi: %v", err)
+		}
+		return license
+	}
+
+	// Produk yang benar: diterima dan tersimpan.
+	garment := buka("garment")
+	if err := garment.Activate(context.Background(), "act_token"); err != nil {
+		t.Fatalf("aktivasi gagal: %v", err)
+	}
+	if !garment.Status().Allowed() {
+		t.Fatalf("lease produk sendiri ditolak: %s", garment.Status())
+	}
+
+	// Direktori state yang sama dibuka produk LAIN: lease di disk ditolak.
+	lain := buka("erp")
+	if status := lain.Status(); status.State != gonsu.StateUnknown || status.Allowed() {
+		t.Fatalf("lease tersimpan milik produk lain diterima: %s", status)
+	}
+
+	// Lease segar dari GONSU pun ditolak, dan tidak menimpa berkas di disk.
+	if err := lain.Refresh(context.Background()); err != nil {
+		t.Fatalf("heartbeat gagal: %v", err)
+	}
+	if status := lain.Status(); status.Allowed() {
+		t.Fatalf("lease dari GONSU untuk produk lain diterima: %s", status)
+	}
+	if !buka("garment").Status().Allowed() {
+		t.Fatal("lease produk sendiri di disk hilang karena produk lain membukanya")
+	}
+}
+
+// ProductCode kosong mempertahankan perilaku lama: produk yang sudah terpasang
+// tidak boleh berhenti hanya karena SDK-nya diperbarui.
+func TestProductCode_KosongTidakMemeriksa(t *testing.T) {
+	issued := time.Date(2026, 9, 6, 10, 0, 0, 0, time.UTC)
+	platform := newFakePlatform(t, issued)
+
+	license, err := gonsu.Open(gonsu.Options{
+		BaseURL:        platform.server.URL,
+		InstallationID: "ins_01M1",
+		StateDir:       t.TempDir(),
+		VendorKeys:     []gonsu.VendorKey{platform.vendorKey()},
+		Clock:          func() time.Time { return issued.Add(time.Minute) },
+	})
+	if err != nil {
+		t.Fatalf("membuka lisensi: %v", err)
+	}
+	if err := license.Activate(context.Background(), "act_token"); err != nil {
+		t.Fatalf("aktivasi gagal: %v", err)
+	}
+	if !license.Status().Allowed() {
+		t.Fatalf("ProductCode kosong mengubah perilaku: %s", license.Status())
+	}
+}

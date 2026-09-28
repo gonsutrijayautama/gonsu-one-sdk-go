@@ -62,11 +62,16 @@ func run() error {
 	license, err := gonsu.Open(gonsu.Options{
 		BaseURL:        wajib("GONSU_BASE_URL"),
 		InstallationID: wajib("GONSU_INSTALLATION_ID"),
-		StateDir:       nilaiAtau("GONSU_STATE_DIR", "./.state"),
-		VendorKeys:     vendorKeys,
-		Version:        version,
-		Platform:       runtime.GOOS + "/" + runtime.GOARCH,
-		Logger:         logger,
+		// Produk sungguhan MENULIS kodenya sendiri di sini, bukan membacanya
+		// dari environment. Contoh ini dipakai untuk produk apa pun, jadi
+		// kodenya dibaca dari GONSU_PRODUCT_CODE; kosong berarti tidak
+		// diperiksa.
+		ProductCode: os.Getenv("GONSU_PRODUCT_CODE"),
+		StateDir:    nilaiAtau("GONSU_STATE_DIR", "./.state"),
+		VendorKeys:  vendorKeys,
+		Version:     version,
+		Platform:    runtime.GOOS + "/" + runtime.GOARCH,
+		Logger:      logger,
 	})
 	if err != nil {
 		return err
