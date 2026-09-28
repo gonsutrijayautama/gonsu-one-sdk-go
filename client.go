@@ -305,12 +305,24 @@ type ReleaseOffer struct {
 	Mandatory   bool   `json:"mandatory"`
 	Changelog   string `json:"changelog"`
 	PublishedAt string `json:"published_at"`
+	// MinUpgradableFrom adalah versi terendah yang boleh langsung naik ke
+	// rilis ini. Kosong berarti tidak ada syarat.
+	MinUpgradableFrom string `json:"min_upgradable_from,omitempty"`
 }
 
 // UpdateOffer adalah jawaban pemeriksaan pembaruan.
 type UpdateOffer struct {
-	CurrentVersion string        `json:"current_version"`
-	UpToDate       bool          `json:"up_to_date"`
+	CurrentVersion string `json:"current_version"`
+	// UpToDate true bila tidak ada versi yang lebih baru untuk dipasang —
+	// termasuk bila yang berjalan justru lebih baru daripada yang ditawarkan.
+	UpToDate bool `json:"up_to_date"`
+	// Downgrade true bila rilis yang ditawarkan lebih lama daripada yang
+	// berjalan, biasanya karena rilis yang terpasang sudah ditarik. Memasangnya
+	// berarti turun versi; lakukan hanya atas permintaan eksplisit operator.
+	Downgrade bool `json:"downgrade"`
+	// UpgradeBlocked true bila versi yang berjalan tidak memenuhi
+	// MinUpgradableFrom rilis yang ditawarkan. Image-nya tidak disertakan.
+	UpgradeBlocked bool          `json:"upgrade_blocked"`
 	Latest         *ReleaseOffer `json:"latest"`
 }
 
