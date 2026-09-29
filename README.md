@@ -1,9 +1,20 @@
-# GONSU One — SDK Lisensi (Go)
+# GONSU One — SDK Go
 
 **Untuk tim yang membangun produk untuk dijual di GONSU One.**
 
-SDK ini ditanam **di dalam** produk Anda. Ia menjawab satu pertanyaan: apa yang
-boleh dijalankan pemasangan ini, dan sampai kapan.
+Satu module, beberapa paket:
+
+| paket | untuk |
+|---|---|
+| `github.com/gonsutrijayautama/gonsu-one-sdk-go` | lisensi — halaman ini |
+| `github.com/gonsutrijayautama/gonsu-one-sdk-go/auth` | login pengguna produk — [auth/README.md](auth/README.md) |
+
+Paket yang tidak Anda impor tidak ikut dikompilasi ke binary Anda.
+
+## Lisensi
+
+Paket lisensi ditanam **di dalam** produk Anda. Ia menjawab satu pertanyaan: apa
+yang boleh dijalankan pemasangan ini, dan sampai kapan.
 
 Yang TIDAK perlu Anda kerjakan sendiri: menerbitkan pemasangan, menyerahkan
 token aktivasi, atau menerapkan lisensi ketika ada yang berlangganan. Platform
