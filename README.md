@@ -8,6 +8,10 @@ Satu module, beberapa paket:
 |---|---|
 | `github.com/gonsutrijayautama/gonsu-one-sdk-go` | lisensi — halaman ini |
 | `github.com/gonsutrijayautama/gonsu-one-sdk-go/auth` | login pengguna produk — [auth/README.md](auth/README.md) |
+| `github.com/gonsutrijayautama/gonsu-one-sdk-go/web` | **kit untuk produk web**: login, hak pakai, dan beri akses dalam satu pasangan — [web/README.md](web/README.md) |
+
+Produk web Go cukup memasang kit `web`; ia memakai kedua paket di atas di
+dalamnya.
 
 Paket yang tidak Anda impor tidak ikut dikompilasi ke binary Anda.
 
