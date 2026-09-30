@@ -89,12 +89,30 @@ ditolak.
 | **Akun saya** | `/auth/gonsu/account?return=/jalur/saat/ini` — profil, sandi, verifikasi dua langkah, passkey di GONSU, dengan tombol kembali ke aplikasi Anda |
 | **Lupa sandi** | `/auth/gonsu/forgot-password` |
 | **Masuk dengan akun lain** | `/auth/gonsu/switch-account` |
+| **Kelola langganan** | `/auth/gonsu/portal/subscription` — langganan bisnis ini di Portal GONSU |
+| **Bayar tagihan** | `/auth/gonsu/portal/invoices` — tagihan bisnis ini di Portal GONSU |
+| **Lihat paket** | `/auth/gonsu/portal/plans` — paket produk Anda, untuk upgrade saat fitur belum termasuk paket atau kuota penuh |
 
 `/` sengaja tidak dipakai kit. Halaman muka milik Anda dan pelanggan Anda.
 Tombol **Buka aplikasi** di Portal GONSU menuju `/auth/gonsu/login`.
 
 Tidak ada layar sandi di produk. Layar sandi di domain produk melatih pengguna
 mengetik sandi GONSU-nya di tempat yang bukan GONSU.
+
+Ketiga tautan Portal menjawab 404 bila GONSU tidak menyerahkan alamat Portal
+(`GONSU_PORTAL_URL`); tampilkan tautannya hanya bila `kit.PortalConfigured()`.
+Portal sendiri yang memeriksa siapa pembukanya — orang yang login ke aplikasi
+belum tentu anggota bisnisnya di Portal, apalagi berhak melihat tagihan. Karena
+itu tampilkan tautannya hanya kepada role Anda yang mengurus langganan, dan jaga
+jalurnya dengan izin yang sama:
+
+```go
+r.With(requireSession, requirePermission).Handle("/auth/gonsu/portal/*", kit.Handler())
+r.Handle("/auth/gonsu/*", kit.Handler())
+```
+
+`kit.PortalURL(ctx, web.PortalPlans)` memberikan alamatnya langsung, misalnya
+untuk email atau tombol yang dibuka di tab baru.
 
 ## Keluar
 
@@ -188,6 +206,7 @@ Diisi GONSU. Produk tidak menulis satu pun di antaranya.
 | lisensi | `GONSU_BASE_URL`, `GONSU_INSTALLATION_ID`, `GONSU_STATE_DIR`, `GONSU_ACTIVATION_TOKEN`, `GONSU_LICENSE_PUBLIC_KEYS` | `GONSU_AGENT_URL` |
 | beri akses | `GONSU_IDENTITY_TOKEN` | `GONSU_AGENT_URL` |
 | pemilik | `GONSU_ORGANIZATION_ID`, `GONSU_OWNER_SUBJECT` | `GONSU_AGENT_URL` |
+| Portal | `GONSU_PORTAL_URL` | `GONSU_PORTAL_URL` (berkas env pemasangan) |
 
 Paket self-host lama yang hanya mengisi `GONSU_LICENSE_URL` dan
 `GONSU_OIDC_URL` tetap dikenali.

@@ -297,6 +297,7 @@ dan kunci pemasangan berhenti di agent, dan produk hanya menerima alamat agent.
 | `GONSU_IDENTITY_TOKEN` | Secret aplikasi — bearer SEMPIT untuk `POST $GONSU_BASE_URL/license/v1/identities` | tidak ada; produk memanggil `POST http://agent:8099/v1/identities` |
 | `GONSU_LICENSE_URL` | tidak ada | `http://agent:8099/v1/license` — hak pakai yang sudah diverifikasi agent |
 | `GONSU_OIDC_URL` | tidak ada; login memakai `GONSU_OIDC_*` (lihat SDK login) | `http://agent:8099/v1/oidc` |
+| `GONSU_PORTAL_URL` | Secret aplikasi — alamat Portal untuk tautan langganan, tagihan, dan paket | berkas env pemasangan, diteruskan ke produk |
 | kunci publik GONSU | **ditanam saat build**, tidak pernah disuntikkan | ditanam di agent |
 
 Keempat variabel pemilik dan identitas dapat TIDAK ADA — bukan kosong. Pemilik

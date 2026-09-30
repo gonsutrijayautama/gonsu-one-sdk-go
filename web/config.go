@@ -66,6 +66,10 @@ type environment struct {
 	// Pemilik pemasangan (cloud; self-host membacanya dari agent).
 	organizationID string
 	ownerSubject   string
+
+	// portalURL adalah alamat Portal GONSU (GONSU_PORTAL_URL), di kedua mode:
+	// cloud dari Secret, self-host dari berkas env pemasangan.
+	portalURL string
 }
 
 // readEnvironment membaca environment. Tidak menghubungi siapa pun.
@@ -117,6 +121,13 @@ func readEnvironment(getenv func(string) string) (environment, error) {
 		env.identityToken = get("GONSU_IDENTITY_TOKEN")
 		env.organizationID = get("GONSU_ORGANIZATION_ID")
 		env.ownerSubject = get("GONSU_OWNER_SUBJECT")
+	}
+
+	env.portalURL = strings.TrimRight(get("GONSU_PORTAL_URL"), "/")
+	if env.portalURL != "" {
+		if err := checkURL("GONSU_PORTAL_URL", env.portalURL); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
 	var err error

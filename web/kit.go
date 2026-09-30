@@ -77,15 +77,16 @@ type Options struct {
 // Kit adalah pegangan produk terhadap GONSU. Aman dipakai dari banyak
 // goroutine.
 type Kit struct {
-	env        environment
-	hooks      Hooks
-	pending    PendingStore
-	logger     *slog.Logger
-	oidc       *oidcSource
-	license    *License
-	lease      *leaseLicense
-	identities *Identities
-	now        func() time.Time
+	env         environment
+	productCode string
+	hooks       Hooks
+	pending     PendingStore
+	logger      *slog.Logger
+	oidc        *oidcSource
+	license     *License
+	lease       *leaseLicense
+	identities  *Identities
+	now         func() time.Time
 }
 
 // New membaca environment dan menyiapkan kit. Tidak menghubungi GONSU maupun
@@ -127,12 +128,13 @@ func New(options Options) (*Kit, error) {
 	}
 
 	k := &Kit{
-		env:        env,
-		hooks:      options.Hooks,
-		pending:    pending,
-		logger:     logger,
-		identities: &Identities{url: env.identitiesURL(), token: env.identityToken, http: client},
-		now:        time.Now,
+		env:         env,
+		productCode: strings.TrimSpace(options.ProductCode),
+		hooks:       options.Hooks,
+		pending:     pending,
+		logger:      logger,
+		identities:  &Identities{url: env.identitiesURL(), token: env.identityToken, http: client},
+		now:         time.Now,
 	}
 
 	if k.oidc, err = newOIDCSource(env, client, logger); err != nil {
@@ -250,5 +252,8 @@ func (k *Kit) Handler() http.Handler {
 	mux.HandleFunc("GET "+AccountPath, k.account)
 	mux.HandleFunc("GET "+ForgotPasswordPath, k.forgotPassword)
 	mux.HandleFunc("GET "+SwitchAccountPath, k.switchAccount)
+	mux.HandleFunc("GET "+PortalSubscriptionPath, k.portal(PortalSubscription))
+	mux.HandleFunc("GET "+PortalInvoicesPath, k.portal(PortalInvoices))
+	mux.HandleFunc("GET "+PortalPlansPath, k.portal(PortalPlans))
 	return mux
 }
