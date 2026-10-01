@@ -364,4 +364,4 @@ Perkakas internal untuk tim yang membangun produk bagi platform GONSU One.
 Pembeli produk tersebut menerima bentuk terkompilasinya dan tidak membutuhkan
 lisensi tersendiri. Selengkapnya di [LICENSE](LICENSE).
 
-Hak Cipta (c) 2026 PT Gonsu Trijaya Utama.
+Hak Cipta (c) 2026 CV Gonsu Trijaya Utama.
